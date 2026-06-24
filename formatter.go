@@ -16,8 +16,8 @@ func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) erro
 		}
 		pr.Print(">")
 		pr.IncreaseIndent()
-		if v.Children != nil {
-			pr.LnPrint(v.Children)
+		for _, child := range v.Children {
+			pr.LnPrint(child)
 		}
 		pr.DecreaseIndent()
 		pr.LnPrint("</").Print(v.Name, ">")

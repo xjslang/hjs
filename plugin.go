@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	startTag  = token.RegisterType("start-tag")
-	endTag    = token.RegisterType("end-tag")
-	concatTag = token.RegisterType("concat")
+	startTag = token.RegisterType("start-tag")
+	endTag   = token.RegisterType("end-tag")
 )
 
 type Attr struct {
@@ -24,7 +23,7 @@ type Tag struct {
 	ast.BaseExpr
 	Name     *js.Ident
 	Attrs    []Attr
-	Children ast.Expr
+	Children []ast.Expr
 }
 
 type ConcatExpr struct {
@@ -63,10 +62,12 @@ func ParseTag(p *parser.Parser) (_ *Tag, err error) {
 	if _, err = p.Expect(token.GT); err != nil {
 		return
 	}
-	if p.CurrentToken.Type != endTag {
-		if node.Children, err = p.ParseExpr(); err != nil {
+	for p.CurrentToken.Type != endTag {
+		var child ast.Expr
+		if child, err = p.ParseExpr(); err != nil {
 			return
 		}
+		node.Children = append(node.Children, child)
 	}
 	if _, err = p.Expect(endTag); err != nil {
 		return
@@ -90,7 +91,6 @@ func ParseTag(p *parser.Parser) (_ *Tag, err error) {
 // Plugin enriches the JavaScript parser, so that we can parse expressions that are not part of the JS standard.
 func Plugin(b *builder.Builder) {
 	token.RegisterUnaryType(startTag)
-	token.RegisterBinaryType(concatTag, token.OR.Precedence())
 
 	// now the parser can "scan" '<' and '</'
 	b.UseScanner(func(sc *scanner.Scanner, next func() (token.Token, error)) (tok token.Token, err error) {
@@ -107,8 +107,6 @@ func Plugin(b *builder.Builder) {
 				tok.Type = endTag
 				tok.Literal = "</"
 			}
-		} else if tok.Literal == "|" {
-			tok.Type = concatTag
 		}
 		return
 	})
@@ -119,18 +117,5 @@ func Plugin(b *builder.Builder) {
 			return ParseTag(p)
 		}
 		return next()
-	})
-
-	// now the parser can "concatenate" elements
-	b.UseBinaryParser(func(p *parser.Parser, left ast.Expr, next func(left ast.Expr) (ast.Expr, error)) (_ ast.Expr, err error) {
-		if p.CurrentToken.Type == concatTag {
-			node := &ConcatExpr{Left: left}
-			p.AdvanceToken()
-			if node.Right, err = js.ParseRightExpr(p, concatTag.Precedence()); err != nil {
-				return
-			}
-			return node, nil
-		}
-		return next(left)
 	})
 }

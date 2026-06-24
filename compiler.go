@@ -30,8 +30,8 @@ func Compiler(pr *printer.Printer, node ast.Node, next func(node ast.Node) error
 				pr.Print("elem.setAttribute('", attr.Name, "', ", attr.Value, ");")
 			}
 		}
-		if v.Children != nil {
-			pr.Print("elem.append(", v.Children, ");")
+		for _, child := range v.Children {
+			pr.Print("elem.append(", child, ");")
 		}
 		pr.Print("return elem})()")
 	default:
