@@ -2,23 +2,17 @@
 
 ```js
 let p = <p>
-  "Hello, " | <strong>"Word!"</strong>
+  "Hello, " <strong>"Word!"</strong>
 </p>
 
-// is transpiled to
+// is compiled to
 let p = (function () {
-  const elem = document.createElement('p');
+  const elem = document.createElement("p");
+  elem.append("Hello, ");
   elem.append(
     (function () {
-      const elem = document.createDocumentFragment();
-      elem.append("Hello, ");
-      elem.append(
-        (function () {
-          const elem = document.createElement('strong');
-          elem.append("World!");
-          return elem;
-        })(),
-      );
+      const elem = document.createElement("strong");
+      elem.append("Word!");
       return elem;
     })(),
   );
@@ -28,7 +22,7 @@ let p = (function () {
 
 ## How to use it
 
-You will find more examples in [./jsx_test.go](./jsx_test.go).
+You will find more examples in [./hjs_test.go](./hjs_test.go).
 
 ```go
 package main
@@ -36,26 +30,28 @@ package main
 import (
 	"fmt"
 
-	"github.com/xjslang/xjs/examples/jsx"
+	"github.com/xjslang/hjs"
 )
 
 func main() {
 	// transform the input to AST
 	input := `let p = <p>
-  "Hello, " |
+  "Hello, "
   <strong>"World!"</strong>
 </p>`
-	result, err := jsx.Parse([]byte(input))
+	result, err := hjs.Parse([]byte(input))
 	if err != nil {
 		panic(err)
 	}
 
 	// transform the AST to valid JS code
-	jsCode, err := jsx.Compile(result)
+	jsCode, err := hjs.Compile(result, hjs.WithRuntime())
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(jsCode)
-	// Output: let p = (function(){const elem = ...})();
+	// Output:
+	// function rx(initVal) {...}
+	// let p = (function(){const elem = document.createElement('p');...
 }
 ```
