@@ -1,6 +1,8 @@
 package hjs
 
 import (
+	"github.com/xjslang/hjs/html"
+	"github.com/xjslang/hjs/rx"
 	"github.com/xjslang/xjs"
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/js"
@@ -21,8 +23,8 @@ func WithRuntime() CompileOption {
 
 func Parse(input []byte) (*js.Program, error) {
 	b := xjs.NewBuilder().
-		Install(Plugin).
-		Install(RxPlugin)
+		Install(html.Plugin).
+		Install(rx.Plugin)
 	p := b.Build(input)
 	return js.ParseProgram(p)
 }
@@ -36,10 +38,10 @@ func Compile(result ast.Node, opts ...CompileOption) (string, error) {
 		opt(cfg)
 	}
 	pr := xjs.NewPrinter(printer.Compact())
-	pr.UsePrinter(Compiler)
-	pr.UsePrinter(RxCompiler)
+	pr.UsePrinter(html.Compiler)
+	pr.UsePrinter(rx.Compiler)
 	if cfg.withRuntime {
-		pr.Print(RxRuntime, "\n\n")
+		pr.Print(rx.Runtime, "\n\n")
 	}
 	pr.Print(result)
 	return pr.Output()
@@ -47,8 +49,8 @@ func Compile(result ast.Node, opts ...CompileOption) (string, error) {
 
 func Format(result ast.Node, opts ...printer.Option) (string, error) {
 	pr := xjs.NewPrinter(opts...)
-	pr.UsePrinter(Formatter)
-	pr.UsePrinter(RxFormatter)
+	pr.UsePrinter(html.Formatter)
+	pr.UsePrinter(rx.Formatter)
 	pr.Print(result)
 	return pr.Output()
 }

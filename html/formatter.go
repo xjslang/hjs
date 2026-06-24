@@ -1,4 +1,4 @@
-package hjs
+package html
 
 import (
 	"github.com/xjslang/xjs/ast"
@@ -19,20 +19,6 @@ func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) erro
 		}
 		pr.DecreaseIndent()
 		pr.Print(v.Layout.EndTag, v.Name, ">")
-	default:
-		return next(node)
-	}
-	return nil
-}
-
-func RxFormatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
-	switch v := node.(type) {
-	case *RxVariable:
-		pr.Print(v.Variable)
-	case *RxLetStmt:
-		pr.Print(v.LetStmt)
-	case *RxAssignStmt:
-		pr.Print(v.AssignStmt)
 	default:
 		return next(node)
 	}
