@@ -12,7 +12,7 @@ import (
 func ExampleCompile() {
 	// transform the input to AST
 	input := `let p = <p>
-		"Hello, " |
+		"Hello, "
 		<strong>"World!"</strong>
 	</p>`
 	result, err := Parse([]byte(input))
@@ -26,12 +26,12 @@ func ExampleCompile() {
 		panic(err)
 	}
 	fmt.Println(jsCode)
-	// Output: let p = (function(){const elem = document.createElement('p');elem.append((function(){const elem = document.createDocumentFragment();elem.append("Hello, ");elem.append((function(){const elem = document.createElement('strong');elem.append("World!");return elem})());return elem})());return elem})();
+	// Output: let p = (function(){const elem = document.createElement('p');elem.append("Hello, ");elem.append((function(){const elem = document.createElement('strong');elem.append("World!");return elem})());return elem})();
 }
 
 func ExampleFormat() {
 	// transform the input to AST
-	input := `let p = <p>"Hello, " | <strong>"World!"</strong></p>`
+	input := `let p = <p>"Hello, "<strong>"World!"</strong></p>`
 	result, err := Parse([]byte(input))
 	if err != nil {
 		panic(err)
@@ -45,7 +45,7 @@ func ExampleFormat() {
 	fmt.Println(xjsCode)
 	// Output:
 	// let p = <p>
-	//   "Hello, " | <strong>
+	//   "Hello, " <strong>
 	//     "World!"
 	//   </strong>
 	// </p>;
@@ -111,7 +111,7 @@ func TestFormat(t *testing.T) {
 	t.Run("with comments", func(t *testing.T) {
 		input := `let p = <p>
 		// c1
-		"Hello, " |
+		"Hello, "
 		<strong>
 		/* c2 */
 		"World!"</strong></p>`
@@ -121,7 +121,7 @@ func TestFormat(t *testing.T) {
 		// transform the AST to properly formatted code
 		code, err := Format(result, printer.WithIndent("\t"))
 		require.NoError(t, err)
-		expectedCode := "let p = <p>\n\t// c1\n\t\"Hello, \" | <strong>\n\t\t/* c2 */\n\t\t\"World!\"\n\t</strong>\n</p>;"
+		expectedCode := "let p = <p>\n\t// c1\n\t\"Hello, \" <strong>\n\t\t/* c2 */\n\t\t\"World!\"\n\t</strong>\n</p>;"
 		require.Equal(t, expectedCode, code)
 	})
 }

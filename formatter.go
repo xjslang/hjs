@@ -7,8 +7,6 @@ import (
 
 func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
-	case *ConcatExpr:
-		pr.Print(v.Left, " | ", v.Right)
 	case *Tag:
 		pr.SpPrint("<").Print(v.Name)
 		for _, a := range v.Attrs {
@@ -16,8 +14,8 @@ func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) erro
 		}
 		pr.Print(">")
 		pr.IncreaseIndent()
-		if v.Children != nil {
-			pr.LnPrint(v.Children)
+		for _, child := range v.Children {
+			pr.LnPrint(child)
 		}
 		pr.DecreaseIndent()
 		pr.LnPrint("</").Print(v.Name, ">")
