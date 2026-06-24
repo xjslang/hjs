@@ -7,17 +7,17 @@ import (
 	"github.com/xjslang/xjs/parser"
 )
 
-type RxVariable struct {
+type rxVariable struct {
 	ast.BaseExpr
 	Variable *js.Variable
 }
 
-type RxLetStmt struct {
+type rxLetStmt struct {
 	ast.BaseStmt
 	LetStmt *js.LetStmt
 }
 
-type RxAssignStmt struct {
+type rxAssignStmt struct {
 	ast.BaseStmt
 	AssignStmt *js.AssignStmt
 }
@@ -30,13 +30,13 @@ func Plugin(b *builder.Builder) {
 		switch v := node.(type) {
 		case *js.LetStmt:
 			if v.Name.Literal[0] == '$' {
-				w := &RxLetStmt{}
+				w := &rxLetStmt{}
 				w.LetStmt = v
 				return w, nil
 			}
 		case *js.AssignStmt:
 			if v.Name.Literal[0] == '$' {
-				w := &RxAssignStmt{}
+				w := &rxAssignStmt{}
 				w.AssignStmt = v
 				return w, nil
 			}
@@ -50,7 +50,7 @@ func Plugin(b *builder.Builder) {
 		}
 		if node, ok := node.(*js.Variable); ok {
 			if node.Name.Literal[0] == '$' {
-				v := &RxVariable{}
+				v := &rxVariable{}
 				v.Variable = node
 				return v, nil
 			}

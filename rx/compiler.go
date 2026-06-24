@@ -23,11 +23,11 @@ const Runtime = `function rx(initVal) {
 
 func Compiler(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
-	case *RxVariable:
+	case *rxVariable:
 		pr.Print(v.Variable.Name, ".get()")
-	case *RxLetStmt:
+	case *rxLetStmt:
 		pr.Print("let ", v.LetStmt.Name, " = rx(", v.LetStmt.Value, ")")
-	case *RxAssignStmt:
+	case *rxAssignStmt:
 		pr.Print(v.AssignStmt.Name, ".set(", v.AssignStmt.Value, ")")
 	default:
 		return next(node)

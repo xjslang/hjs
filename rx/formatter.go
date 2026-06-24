@@ -7,11 +7,11 @@ import (
 
 func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
-	case *RxVariable:
+	case *rxVariable:
 		pr.Print(v.Variable)
-	case *RxLetStmt:
+	case *rxLetStmt:
 		pr.Print(v.LetStmt)
-	case *RxAssignStmt:
+	case *rxAssignStmt:
 		pr.Print(v.AssignStmt)
 	default:
 		return next(node)
