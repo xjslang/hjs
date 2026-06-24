@@ -13,7 +13,7 @@ var onAttrRe = regexp.MustCompile(`^on([A-Z]\w*)`)
 // Compiler transforms the code to valid JS code.
 func Compiler(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
-	case *Tag:
+	case *tag:
 		pr.Print("(function(){")
 		pr.Print("const elem = document.createElement('", v.Name, "');")
 		for _, attr := range v.Attrs {

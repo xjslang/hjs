@@ -14,24 +14,24 @@ var (
 	endTag   = token.RegisterType("end-tag")
 )
 
-type Attr struct {
+type attr struct {
 	Name  *js.Ident
 	Value ast.Expr
 }
 
-type Tag struct {
+type tag struct {
 	ast.BaseExpr
 	Layout struct {
 		StartTag token.Token
 		EndTag   token.Token
 	}
 	Name     *js.Ident
-	Attrs    []Attr
+	Attrs    []attr
 	Children []ast.Expr
 }
 
-func ParseTag(p *parser.Parser) (_ *Tag, err error) {
-	node := &Tag{}
+func parseTag(p *parser.Parser) (_ *tag, err error) {
+	node := &tag{}
 	if node.Layout.StartTag, err = p.Expect(startTag); err != nil {
 		return
 	}
@@ -39,7 +39,7 @@ func ParseTag(p *parser.Parser) (_ *Tag, err error) {
 		return
 	}
 	for p.CurrentToken.Type != token.GT {
-		var attr Attr
+		var attr attr
 		if attr.Name, err = js.ParseIdent(p); err != nil {
 			return
 		}
@@ -106,7 +106,7 @@ func Plugin(b *builder.Builder) {
 	// now the parser can "parse" HTML tags
 	b.UseUnaryParser(func(p *parser.Parser, next func() (ast.Expr, error)) (_ ast.Expr, err error) {
 		if p.CurrentToken.Type == startTag {
-			return ParseTag(p)
+			return parseTag(p)
 		}
 		return next()
 	})

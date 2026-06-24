@@ -7,7 +7,7 @@ import (
 
 func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
-	case *Tag:
+	case *tag:
 		pr.SpPrint(v.Layout.StartTag).Print(v.Name)
 		for _, a := range v.Attrs {
 			pr.SpPrint(a.Name).Print("=", a.Value)
