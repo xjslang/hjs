@@ -1,4 +1,6 @@
-**[XJS](https://github.com/xjslang/xjs) is a parsing tool that allows us to extend JavaScript with our favorite features.** And this basic example illustrates how we can extend JS to use HTML tags in our expressions. For example:
+A JavaScript dialect with native HTML support. This project was built on top of [XJS](https://github.com/xjslang/xjs), an experimental parsing tool.
+
+## Example
 
 ```js
 let p = <p>
@@ -51,7 +53,6 @@ func main() {
 	}
 	fmt.Println(jsCode)
 	// Output:
-	// function rx(initVal) {...}
 	// let p = (function(){const elem = document.createElement('p');...
 }
 ```
