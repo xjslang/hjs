@@ -33,3 +33,7 @@ func Bench() error {
 func UpdateGoldenFiles() error {
 	return sh.RunV("go", "test", ".", "-update")
 }
+
+func BuildWasm() error {
+	return sh.RunV("tinygo", "build", "-o", "docs/compiler.wasm", "-target", "wasm", "./cmd/main_js.go")
+}

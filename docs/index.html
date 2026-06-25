@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.15.4/beautify.min.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <script src="wasm_exec.js"></script>
+    <title>Playground</title>
+    <style>
+      .font-code {
+        font-family: "Fira Code", monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mx-auto max-w-6xl py-2 px-4 lg:py-4 lg:px-6">
+      <div class="flex items-center mb-2">
+        <h2 class="text-2xl font-semibold">HJS Playground</h2>
+        <a href="https://github.com/xjslang/hjs" class="ml-auto">
+          <img src="github.svg" alt="GitHub" width="40" />
+        </a>
+      </div>
+      <div
+        id="playground"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-3 gap-x-4 h-64 lg:h-72 xl:h-[35rem]"
+      >
+        <div class="relative">
+          <div class="absolute top-1 right-1.5 lg:top-3 lg:right-3 z-1">
+            <button id="format" type="button" class="btn btn-xs lg:btn-sm">
+              Format
+            </button>
+            <button id="compile" type="button" class="btn btn-xs lg:btn-sm">
+              Compile
+            </button>
+          </div>
+          <textarea
+            id="input"
+            class="textarea min-h-64 lg:min-h-72 xl:min-h-[35rem] h-full w-full font-code"
+          ></textarea>
+        </div>
+        <div
+          id="output"
+          readonly
+          class="textarea min-h-64 h-full w-full bg-gray-100 whitespace-pre overflow-auto font-code"
+        ></div>
+      </div>
+    </div>
+    <script>
+      const go = new Go();
+      WebAssembly.instantiateStreaming(
+        fetch("compiler.wasm"),
+        go.importObject,
+      ).then((result) => {
+        go.run(result.instance);
+
+        const inputEl = document.getElementById("input");
+        inputEl.value = `/*
+ - use "let" instead of "const" or "var"
+ - use "function foo() {}" instead of "foo = () => {}"
+*/
+
+let msg = 'Click me'
+let handleClick = function () {
+	alert('Hello, World!')
+}
+let btn = <p>
+	"Hello, " <strong>"World!"</strong>
+	<button type="button" onClick=handleClick>
+		msg
+	</button>
+</p>`;
+        inputEl.addEventListener("keydown", (e) => {
+          if (e.key === "Tab") {
+            e.preventDefault();
+            const start = inputEl.selectionStart;
+            const end = inputEl.selectionEnd;
+            const val = inputEl.value;
+            inputEl.value = `${val.substring(0, start)}\t${val.substring(end)}`;
+            inputEl.selectionStart = inputEl.selectionEnd = start + 1;
+          }
+        });
+
+        const outputEl = document.getElementById("output");
+        const preface = `// HJS is a proof of concept built on top of XJS,
+// an eXtensible JavaScript parser.
+//
+// It consists of a parser that transforms
+// HTML tags into valid JS code.`;
+        outputEl.innerText = preface;
+
+        let formatError = false;
+        const formatBtn = document.getElementById("format");
+        formatBtn.addEventListener("click", () => {
+          if (formatError) {
+            outputEl.innerText = "";
+          }
+          const { code, error } = hjs.format(inputEl.value);
+          if (error) {
+            formatError = true;
+            outputEl.innerText = error;
+            return;
+          }
+          formatError = false;
+          inputEl.value = code;
+        });
+
+        const compileBtn = document.getElementById("compile");
+        compileBtn.addEventListener("click", () => {
+          const { code, error } = hjs.compile(inputEl.value);
+          if (error) {
+            outputEl.innerText = error;
+            return;
+          }
+          const indentedCode = js_beautify(code, {
+            indent_size: 2,
+            indent_char: " ",
+            max_preserve_newlines: 2,
+            brace_style: "collapse",
+          });
+          outputEl.innerText = `${preface}\n\n${indentedCode}`;
+        });
+      });
+    </script>
+  </body>
+</html>
