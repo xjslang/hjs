@@ -2,31 +2,11 @@
 
 A JavaScript dialect with native HTML support. This project was built on top of [XJS](https://github.com/xjslang/xjs), an experimental parsing tool.
 
-## Example
+## Playground
 
-```js
-let p = <p>
-  "Hello, " <strong>"Word!"</strong>
-</p>
-
-// is compiled to
-let p = (function () {
-  const elem = document.createElement("p");
-  elem.append("Hello, ");
-  elem.append(
-    (function () {
-      const elem = document.createElement("strong");
-      elem.append("Word!");
-      return elem;
-    })(),
-  );
-  return elem;
-})();
-```
+https://xjslang.github.io/hjs/
 
 ## How to use it
-
-You will find more examples in [./hjs_test.go](./hjs_test.go).
 
 ```go
 package main
@@ -38,11 +18,12 @@ import (
 )
 
 func main() {
-	// transform the input to AST
 	input := `let p = <p>
   "Hello, "
   <strong>"World!"</strong>
 </p>`
+
+	// transform the input to AST
 	result, err := hjs.Parse([]byte(input))
 	if err != nil {
 		panic(err)
@@ -53,11 +34,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println(jsCode)
 	// Output:
-	// let p = (function(){const elem = document.createElement('p');...
+	// let p = (function () {
+	//   const elem = document.createElement("p");
+	//   elem.append("Hello, ");
+	//   elem.append(
+	//     (function () {
+	//       const elem = document.createElement("strong");
+	//       elem.append("Word!");
+	//       return elem;
+	//     })(),
+	//   );
+	//   return elem;
+	// })();
 }
 ```
+
+You'll find more examples in [./hjs_test.go](./hjs_test.go).
 
 ## Dev
 
@@ -72,6 +67,7 @@ func main() {
 ```
 
 **Main mage commands:**
+
 ```bash
 mage lint # check source code for errors
 mage test # execute tests
