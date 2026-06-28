@@ -1,4 +1,4 @@
-package hjs
+package html
 
 import (
 	"github.com/xjslang/xjs/ast"
@@ -14,24 +14,24 @@ var (
 	endTag   = token.RegisterType("end-tag")
 )
 
-type attr struct {
+type Attr struct {
 	Name  *js.Ident
 	Value ast.Expr
 }
 
-type tag struct {
+type Tag struct {
 	ast.BaseExpr
 	Layout struct {
 		StartTag token.Token
 		EndTag   token.Token
 	}
 	Name     *js.Ident
-	Attrs    []attr
+	Attrs    []Attr
 	Children []ast.Expr
 }
 
-func parseTag(p *parser.Parser) (_ *tag, err error) {
-	node := &tag{}
+func parseTag(p *parser.Parser) (_ *Tag, err error) {
+	node := &Tag{}
 	if node.Layout.StartTag, err = p.Expect(startTag); err != nil {
 		return
 	}
@@ -39,7 +39,7 @@ func parseTag(p *parser.Parser) (_ *tag, err error) {
 		return
 	}
 	for p.CurrentToken.Type != token.GT {
-		var attr attr
+		var attr Attr
 		if attr.Name, err = js.ParseIdent(p); err != nil {
 			return
 		}
