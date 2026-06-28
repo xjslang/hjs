@@ -1,4 +1,4 @@
-package hjs
+package html
 
 import (
 	"github.com/xjslang/xjs/ast"
@@ -7,7 +7,7 @@ import (
 
 func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
-	case *tag:
+	case *Tag:
 		pr.SpPrint(v.Layout.StartTag).Print(v.Name)
 		for _, a := range v.Attrs {
 			pr.SpPrint(a.Name).Print("=", a.Value)
