@@ -9,21 +9,24 @@ import (
 )
 
 func Parse(input []byte) (*js.Program, error) {
-	b := xjs.NewBuilder().Install(html.Plugin)
-	p := b.Build(input)
+	p := xjs.PluginBuilder().
+		Install(html.Plugin).
+		Build(input)
 	return js.ParseProgram(p)
 }
 
 func Compile(result ast.Node) (string, error) {
-	pr := xjs.NewPrinter(printer.Compact())
-	pr.UsePrinter(html.Compiler)
+	pr := xjs.PrinterBuilder().
+		UsePrinter(html.Compiler).
+		Build(printer.Compact())
 	pr.Print(result)
 	return pr.Output()
 }
 
 func Format(result ast.Node, opts ...printer.Option) (string, error) {
-	pr := xjs.NewPrinter(opts...)
-	pr.UsePrinter(html.Formatter)
+	pr := xjs.PrinterBuilder().
+		UsePrinter(html.Formatter).
+		Build(opts...)
 	pr.Print(result)
 	return pr.Output()
 }
