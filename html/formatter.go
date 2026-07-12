@@ -8,9 +8,9 @@ import (
 func Formatter(pr *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
 	case *Tag:
-		pr.Space().Print(v.Layout.StartTag).Print(v.Name)
+		pr.Space().Print(v.Layout.StartTag, v.Name)
 		for _, a := range v.Attrs {
-			pr.Space().Print(a.Name).Print("=", a.Value)
+			pr.Space().Print(a.Name, "=", a.Value)
 		}
 		pr.Print(">")
 		pr.IncreaseIndent()
