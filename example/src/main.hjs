@@ -1,4 +1,4 @@
-import { button } from './components/button.js'
+import { button } from './components/button.hjs'
 
 function main() {
 	return <div>button()</div>;
