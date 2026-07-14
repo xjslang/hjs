@@ -1,7 +1,78 @@
-import { button } from './components/button.hjs'
+import { diffChildren, Render } from './util.hjs'
+import { ctx } from './context.hjs'
+import { openDb, fetchIngredients } from './db.hjs'
 
-function main() {
-	return <div>button()</div>;
+function Main() {
+	const efs = ctx.effects()
+	const rows = ctx.signal([])
+	
+	openDb().
+		then(db => fetchIngredients(db)).
+		then(items => rows.set(items)).
+		catch(err => console.error('Failed to load ingredients', err))
+
+	const handleAddRow = (id) => {
+		const items = [...rows.get()]
+		const pos = items.findIndex(x => x.id == id)
+		if (pos > -1) {
+			items.splice(pos + 1, 0, {
+				id: +new Date(),
+				name: '',
+				kcal100g: 0,
+				total: 0
+			})
+			rows.set(items)
+		}
+	}
+
+	const handleDeleteRow = (id) => {
+		rows.set(rows.get().filter((row) => row.id != id))
+	}
+
+	// TODO: Row-scoped signals/effects are created (and Row even creates an effects group) but nothing ever calls efs.clean() when a row is removed. Deleting rows will leave effects registered in signals, causing memory growth and potentially executing effects for detached DOM nodes.
+	const  Row = (row) => {
+		const efs = ctx.effects()
+		const kcal100g = ctx.signal(row.kcal100g)
+		const total = ctx.signal(row.total)
+
+		const handleChangeKcal100g = e => {
+			const val = parseFloat(e.currentTarget.value) || 0
+			kcal100g.set(val)
+		}
+
+		const handleChangeTotal = e => {
+			const val = parseFloat(e.currentTarget.value) || 0
+			total.set(val)
+		}
+
+		return <tr dataId=(row.id)>
+			<td><input type="text" placeholder="Ingredient" value=(row.name) /></td>
+			<td>
+				<input
+					type="text"
+					placeholder="kcal/100 gr"
+					value=(row.kcal100g)
+					onInput=(handleChangeKcal100g) />
+			</td>
+			<td>
+				<input
+					type="text"
+					placeholder="total gr"
+					value=(row.total)
+					onInput=(handleChangeTotal) />
+			</td>
+			<td>Render(_ => (kcal100g.get() * total.get() / 100).toFixed(2))</td>
+			<td><button type="button" onClick=(() => handleAddRow(row.id))>"+"</button></td>
+			<td><button type="button" onClick=(() => handleDeleteRow(row.id))>"-"</button></td>
+		</tr>
+	}
+
+	const tbodyNode = <tbody />
+	efs.effect(_ => {
+		diffChildren(tbodyNode, rows.get(), row => Row(row))
+	})
+
+	return <table>tbodyNode</table>
 }
 
-export { main };
+export { Main };
