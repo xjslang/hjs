@@ -1,0 +1,28 @@
+import udomdiff from 'udomdiff'
+import { ctx } from './context.hjs'
+
+export function diffChildren(parentNode, rows, insert) {
+	const ids = {}
+	for (const child of parentNode.children) {
+		if (child.dataset.id === undefined) {
+			throw new Error('All children must have dataset.id')
+		}
+		ids[`${child.dataset.id}`] = child
+	}
+	const nodes = rows.map(row => {
+		if (row.id === undefined || row.id === null) {
+			throw new Error('All rows must have an id property')
+		}
+		return ids[`${row.id}`] || insert(row)
+	})
+	udomdiff(parentNode, [...parentNode.children], nodes, n => n)
+}
+
+export function Render(fn) {
+	const efs = ctx.effects()
+	let node = document.createTextNode('')
+	efs.effect(_ => {
+		node.textContent = fn()
+	})
+	return node
+}
