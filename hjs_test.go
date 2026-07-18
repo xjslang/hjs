@@ -87,14 +87,23 @@ func TestCompile(t *testing.T) {
 	require.NoError(t, err)
 	golden.Assert(t, []byte(code))
 
-	t.Run("empty tag", func(t *testing.T) {
-		input := `let p = <p></p>`
-		result, err := hjs.Parse([]byte(input))
-		require.NoError(t, err)
-		out, err := hjs.Compile(result)
-		require.NoError(t, err)
-		require.Equal(t, "let p = (function(){const elem = document.createElement('p');return elem})();", out)
-	})
+	tests := []struct {
+		name, input, expected string
+	}{
+		{"empty tag", `<p></p>`, `(function(){const elem = document.createElement('p');return elem})();`},
+		{"self closing tag", `<div />`, `(function(){const elem = document.createElement('div');return elem})();`},
+		{"dataset", `<span dataUserId='123'>"Hello, World!"</span>`, `(function(){const elem = document.createElement('span');elem.dataset.userId = '123';elem.append("Hello, World!");return elem})();`},
+		{"handler", `<button onMouseDown=(handleClick)>"Click me!"</button>`, `(function(){const elem = document.createElement('button');elem.addEventListener('mousedown', (handleClick));elem.append("Click me!");return elem})();`},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := hjs.Parse([]byte(test.input))
+			require.NoError(t, err)
+			code, err := hjs.Compile(result)
+			require.NoError(t, err)
+			require.Equal(t, test.expected, code)
+		})
+	}
 }
 
 func TestFormat(t *testing.T) {
