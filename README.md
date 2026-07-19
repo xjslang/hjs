@@ -4,7 +4,7 @@
 
 # HJS &ndash; HTML for JavaScript
 
-A JavaScript dialect with native HTML support.
+JavaScript with native HTML tags.
 
 [Playground](https://xjslang.github.io/hjs/)
 
