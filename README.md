@@ -6,8 +6,7 @@
 
 JavaScript with native HTML tags.
 
-[Playground](https://xjslang.github.io/hjs/)
-
+[Playground](https://hjslang.github.io/hjs/)
 </div>
 
 ## How to use it
