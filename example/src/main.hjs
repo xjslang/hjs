@@ -1,10 +1,9 @@
-import { diffChildren, Render } from './util.hjs'
-import { ctx } from './context.hjs'
+import { signal, effects, Render, domdiff } from '/libs/signals/html.js'
 import { openDb, fetchIngredients } from './db.hjs'
 
 function Main() {
-	const efs = ctx.effects()
-	const rows = ctx.signal([])
+	const efs = effects()
+	const rows = signal([])
 	
 	openDb().
 		then(db => fetchIngredients(db)).
@@ -30,8 +29,8 @@ function Main() {
 	}
 
 	const  Row = (effect, row) => {
-		const kcal100g = ctx.signal(row.kcal100g)
-		const total = ctx.signal(row.total)
+		const kcal100g = signal(row.kcal100g)
+		const total = signal(row.total)
 
 		const handleChangeKcal100g = e => {
 			const val = parseFloat(e.currentTarget.value) || 0
@@ -66,10 +65,8 @@ function Main() {
 	}
 
 	const tbodyNode = <tbody />
-	const diff = diffChildren()
-	efs.effect(_ => {
-		diff(tbodyNode, rows.get(), (effect, row) => Row(effect, row))
-	})
+	const diff = domdiff()
+	efs.effect(_ => diff(tbodyNode, rows.get(), Row))
 	return <table>tbodyNode</table>
 }
 
