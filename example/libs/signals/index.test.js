@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createContext } from "./signal";
+import { createContext } from "./index.js";
 
 describe("edge cases", () => {
   test("call get/set outside an effect", () => {
