@@ -1,0 +1,38 @@
+import { signal, Render } from '/libs/signals/html.js'
+import { ctx } from './context.hjs'
+
+export const Row = (row) => {
+	const kcal100g = signal(row.kcal100g)
+	const total = signal(row.total)
+
+	const handleChangeKcal100g = e => {
+		const val = parseFloat(e.currentTarget.value) || 0
+		kcal100g.set(val)
+	}
+
+	const handleChangeTotal = e => {
+		const val = parseFloat(e.currentTarget.value) || 0
+		total.set(val)
+	}
+
+	return <tr dataId=(row.id)>
+		<td><input type="text" placeholder="Ingredient" value=(row.name) /></td>
+		<td>
+			<input
+				type="text"
+				placeholder="kcal/100 gr"
+				value=(row.kcal100g)
+				onInput=(handleChangeKcal100g) />
+		</td>
+		<td>
+			<input
+				type="text"
+				placeholder="total gr"
+				value=(row.total)
+				onInput=(handleChangeTotal) />
+		</td>
+		<td>Render(_ => (kcal100g.get() * total.get() / 100).toFixed(2))</td>
+		<td><button type="button" onClick=(() => ctx.handleAddRow(row.id))>"+"</button></td>
+		<td><button type="button" onClick=(() => ctx.handleDeleteRow(row.id))>"-"</button></td>
+	</tr>
+}

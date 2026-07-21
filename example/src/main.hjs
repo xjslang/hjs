@@ -1,15 +1,17 @@
-import { signal, effect, Render, domdiff } from '/libs/signals/html.js'
+import { signal, effect, domdiff } from '/libs/signals/html.js'
 import { openDb, fetchIngredients } from './db.hjs'
+import { ctx } from './context.hjs'
+import { Row } from './row.hjs'
 
 function Main() {
 	const rows = signal([])
-	
+
 	openDb().
 		then(db => fetchIngredients(db)).
 		then(items => rows.set(items)).
 		catch(err => console.error('Failed to load ingredients', err))
 
-	const handleAddRow = (id) => {
+	ctx.handleAddRow = (id) => {
 		const items = [...rows.get()]
 		const pos = items.findIndex(x => x.id == id)
 		if (pos > -1) {
@@ -23,44 +25,8 @@ function Main() {
 		}
 	}
 
-	const handleDeleteRow = (id) => {
+	ctx.handleDeleteRow = (id) => {
 		rows.set(rows.get().filter((row) => row.id != id))
-	}
-
-	const  Row = (row) => {
-		const kcal100g = signal(row.kcal100g)
-		const total = signal(row.total)
-
-		const handleChangeKcal100g = e => {
-			const val = parseFloat(e.currentTarget.value) || 0
-			kcal100g.set(val)
-		}
-
-		const handleChangeTotal = e => {
-			const val = parseFloat(e.currentTarget.value) || 0
-			total.set(val)
-		}
-
-		return <tr dataId=(row.id)>
-			<td><input type="text" placeholder="Ingredient" value=(row.name) /></td>
-			<td>
-				<input
-					type="text"
-					placeholder="kcal/100 gr"
-					value=(row.kcal100g)
-					onInput=(handleChangeKcal100g) />
-			</td>
-			<td>
-				<input
-					type="text"
-					placeholder="total gr"
-					value=(row.total)
-					onInput=(handleChangeTotal) />
-			</td>
-			<td>Render(_ => (kcal100g.get() * total.get() / 100).toFixed(2))</td>
-			<td><button type="button" onClick=(() => handleAddRow(row.id))>"+"</button></td>
-			<td><button type="button" onClick=(() => handleDeleteRow(row.id))>"-"</button></td>
-		</tr>
 	}
 
 	const tbodyNode = <tbody />
